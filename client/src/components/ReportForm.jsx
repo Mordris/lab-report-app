@@ -1,16 +1,28 @@
-import React, { useState } from 'react';
-import { useCreateReportMutation, useUpdateReportMutation } from '../features/reports/reportsApi';
-import { TextInput, Textarea, Button, Box, FileInput } from '@mantine/core';
-import { DatePicker } from '@mantine/dates';
+import React, { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { TextInput, Textarea, Button, Box, FileInput } from "@mantine/core";
+import {
+  useCreateReportMutation,
+  useUpdateReportMutation,
+} from "../features/reports/reportsApi";
 
 const ReportForm = ({ report = {}, onClose }) => {
-  const [fileNumber, setFileNumber] = useState(report.fileNumber || '');
-  const [patientName, setPatientName] = useState(report.patientName || '');
-  const [patientSurname, setPatientSurname] = useState(report.patientSurname || '');
-  const [patientId, setPatientId] = useState(report.patientId || '');
-  const [diagnosisTitle, setDiagnosisTitle] = useState(report.diagnosisTitle || '');
-  const [diagnosisDetails, setDiagnosisDetails] = useState(report.diagnosisDetails || '');
-  const [issueDate, setIssueDate] = useState(report.issueDate ? new Date(report.issueDate) : new Date());
+  const [fileNumber, setFileNumber] = useState(report.fileNumber || "");
+  const [patientName, setPatientName] = useState(report.patientName || "");
+  const [patientSurname, setPatientSurname] = useState(
+    report.patientSurname || ""
+  );
+  const [patientID, setPatientID] = useState(report.patientID || "");
+  const [diagnosisTitle, setDiagnosisTitle] = useState(
+    report.diagnosisTitle || ""
+  );
+  const [diagnosisDetails, setDiagnosisDetails] = useState(
+    report.diagnosisDetails || ""
+  );
+  const [reportDate, setReportDate] = useState(
+    report.reportDate ? new Date(report.reportDate) : new Date()
+  );
   const [photo, setPhoto] = useState(null);
 
   const [createReport] = useCreateReportMutation();
@@ -18,29 +30,38 @@ const ReportForm = ({ report = {}, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     const formData = new FormData();
     formData.append('fileNumber', fileNumber);
     formData.append('patientName', patientName);
     formData.append('patientSurname', patientSurname);
-    formData.append('patientId', patientId);
+    formData.append('patientID', patientID);
     formData.append('diagnosisTitle', diagnosisTitle);
     formData.append('diagnosisDetails', diagnosisDetails);
-    formData.append('issueDate', issueDate.toISOString());
+    formData.append('reportDate', reportDate.toISOString());
+  
+    // Append photo if it exists
     if (photo) {
       formData.append('photo', photo);
     }
-
-    if (report._id) {
-      await updateReport({ id: report._id, formData });
-    } else {
-      await createReport(formData);
+  
+    try {
+      if (report._id) {
+        await updateReport({ id: report._id, formData });
+      } else {
+        await createReport(formData);
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error creating/updating report:', error);
+      // Handle error, e.g., display error message to user
     }
-    onClose();
   };
-
+  
   return (
     <Box sx={{ maxWidth: 500 }} mx="auto">
       <form onSubmit={handleSubmit} encType="multipart/form-data">
+        {/* File Number Input */}
         <TextInput
           label="File Number"
           placeholder="File Number"
@@ -48,6 +69,7 @@ const ReportForm = ({ report = {}, onClose }) => {
           onChange={(e) => setFileNumber(e.target.value)}
           required
         />
+        {/* Patient Name Input */}
         <TextInput
           label="Patient Name"
           placeholder="Patient Name"
@@ -55,6 +77,7 @@ const ReportForm = ({ report = {}, onClose }) => {
           onChange={(e) => setPatientName(e.target.value)}
           required
         />
+        {/* Patient Surname Input */}
         <TextInput
           label="Patient Surname"
           placeholder="Patient Surname"
@@ -62,13 +85,15 @@ const ReportForm = ({ report = {}, onClose }) => {
           onChange={(e) => setPatientSurname(e.target.value)}
           required
         />
+        {/* Patient ID Input */}
         <TextInput
           label="Patient ID"
           placeholder="Patient ID"
-          value={patientId}
-          onChange={(e) => setPatientId(e.target.value)}
+          value={patientID}
+          onChange={(e) => setPatientID(e.target.value)}
           required
         />
+        {/* Diagnosis Title Input */}
         <TextInput
           label="Diagnosis Title"
           placeholder="Diagnosis Title"
@@ -76,6 +101,7 @@ const ReportForm = ({ report = {}, onClose }) => {
           onChange={(e) => setDiagnosisTitle(e.target.value)}
           required
         />
+        {/* Diagnosis Details Textarea */}
         <Textarea
           label="Diagnosis Details"
           placeholder="Diagnosis Details"
@@ -83,18 +109,21 @@ const ReportForm = ({ report = {}, onClose }) => {
           onChange={(e) => setDiagnosisDetails(e.target.value)}
           required
         />
+        {/* Report Date DatePicker */}
         <DatePicker
-          label="Issue Date"
-          placeholder="Pick date"
-          value={issueDate}
-          onChange={(date) => setIssueDate(date || new Date())}
+          selected={reportDate}
+          onChange={(date) => setReportDate(date)}
+          dateFormat="yyyy-MM-dd"
+          placeholderText="Select report date"
           required
         />
+        {/* Photo FileInput */}
         <FileInput
           label="Physical Report Photo"
           placeholder="Upload a photo"
           onChange={(file) => setPhoto(file)}
         />
+        {/* Submit Button */}
         <Button type="submit" mt="md">
           {report._id ? 'Update Report' : 'Create Report'}
         </Button>

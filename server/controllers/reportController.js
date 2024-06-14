@@ -1,9 +1,16 @@
 const Report = require('../models/Report');
 
-// Create a new report
 const createReport = async (req, res) => {
-  const { fileNumber, patientName, patientSurname, patientID, diagnosisTitle, diagnosisDetails, photo, technician } = req.body;
-  
+  const { fileNumber, patientName, patientSurname, patientID, diagnosisTitle, diagnosisDetails, reportDate } = req.body;
+
+  // Validate required fields
+  if (!fileNumber || !patientName || !patientSurname || !patientID || !diagnosisTitle || !diagnosisDetails || !reportDate) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  // Handle file upload if needed
+  const photo = req.file; // Assuming file is uploaded via multer or similar middleware
+
   try {
     const report = new Report({
       fileNumber,
@@ -12,8 +19,8 @@ const createReport = async (req, res) => {
       patientID,
       diagnosisTitle,
       diagnosisDetails,
-      photo,
-      technician,
+      reportDate,
+      photo: photo ? photo.path : undefined, // Store photo path or URL
     });
 
     await report.save();

@@ -1,3 +1,5 @@
+// reportModel.js (or wherever you define your Mongoose schema)
+
 const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema({
@@ -8,7 +10,7 @@ const reportSchema = new mongoose.Schema({
   diagnosisTitle: { type: String, required: true },
   diagnosisDetails: { type: String, required: true },
   reportDate: { type: Date, default: Date.now },
-  photo: { type: String, required: true },
+  photo: { type: String }, // Assuming 'photo' is a String field to store filename
   technician: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Technician',
